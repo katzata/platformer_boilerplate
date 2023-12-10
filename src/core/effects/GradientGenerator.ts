@@ -32,7 +32,7 @@ export default class GradientGenerator {
 		Object.assign(this.settings, GradientGenerator.defaults, props);
 		const gradientTexture = this.generateTexture();
 
-		this.clearInstances();
+		this.instances = [];
 
 		for (let i = 0; i < this.settings.instances; i++) {
 			const sprite = new PIXI.Sprite(gradientTexture);
@@ -113,9 +113,5 @@ export default class GradientGenerator {
 			// @ts-ignore tuple...
 			gradient.addColorStop(...stops);
 		}
-	}
-
-	private clearInstances() {
-		this.instances = [];
 	}
 }

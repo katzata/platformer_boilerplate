@@ -13,36 +13,34 @@ export default class TestScene extends components.Scene {
 	async onLoad() {
 		const gow = PIXI.Sprite.from("gow copy 2");
 		const gowTexture = PIXI.Texture.from("gow");
-		gowTexture.frame = new PIXI.Rectangle(184, 184, 368, 368);
+		gowTexture.frame = new PIXI.Rectangle(368, 368, 80, 80);
 
 		const container = new PIXI.Container();
 
 		const gowPortion = PIXI.Sprite.from(gowTexture);
-		container.x = gow.width / 2;
-		container.y = gow.height / 2;
+		container.x = 368;
+		container.y = 368;
 
 		const gradient = new effects.GradientGenerator();
 		const [testGradient] = gradient.generateGradient({
-			colorStops: ["rgba(2,0,36,1)", "purple", "rgba(9,9,121,1)", "rgba(0,212,255,1)", "red"],
+			// colorStops: ["rgba(2,0,36,1)", "purple", "rgba(9,9,121,1)", "rgba(0,212,255,1)", "red"],
+			colorStops: ["white", "black"],
 			width: gowPortion.width,
 			height: gowPortion.height,
-			type: "radial",
+			type: "linear",
 			radiuses: [12, 194],
 			cropped: false,
-			radiusOffsets: [
-				{ x: gowPortion.width / 2, y: 0 },
-				{ x: gowPortion.width / 2, y: 0 },
-			],
-			// colorStops: ["rgba(255, 255, 255, 1)", "rgba(0, 0, 0, 1)"],
+			// radiusOffsets: [
+			// 	{ x: gowPortion.width / 2, y: 0 },
+			// 	{ x: gowPortion.width / 2, y: 0 },
+			// ],
 		});
 
 		const whiteSprite = this.renderSprite();
-		whiteSprite.width = gowPortion.width;
+		whiteSprite.width = gowPortion.width / 2;
 		whiteSprite.height = gowPortion.height;
-		whiteSprite.x = container.x;
+		whiteSprite.x = container.x + gowPortion.width / 4;
 		whiteSprite.y = container.y;
-
-		// container.addChild(testGradient);
 
 		this.addChild(gow);
 		this.addChild(whiteSprite);
@@ -51,82 +49,9 @@ export default class TestScene extends components.Scene {
 		container.addChild(gowPortion);
 		container.addChild(testGradient);
 
-		testGradient.x = 0;
-
-		// testGradient.y = testGradient.height;
-		// container.mask = testGradient;
-
-		// const center = [gow.width / 2, gow.width / 2];
-
-		// const shockWaveFilter = new filters.ShockwaveFilter(center, {
-		// 	repeat: true,
-		// });
-
-		// const radius = 184 * 2;
-		// const angle = 6;
-
-		// const twistFilter = new filters.TwistFilter({
-		// 	radius: radius,
-		// 	angle: angle,
-		// 	padding: 20,
-		// 	center: new PIXI.Point(center[0], center[1]),
-		// });
-
-		// const radialBlurFilter = new filters.RadialBlur({
-		// 	angle: angle,
-		// 	center: center,
-		// 	kernelSize: 9,
-		// 	radius: radius,
-		// 	animSpeed: 2,
-		// 	animateRadius: true,
-		// 	animateAngle: false,
-		// });
-
-		/* const canvas = document.createElement("canvas");
-		const ctx = canvas.getContext("2d");
-		let sphere = new filters.Sphere(ctx, 1, 36, 18, false);
-		// change params of sphere later
-		sphere.setRadius(2);
-		sphere.setSectorCount(8);
-		sphere.setStackCount(4);
-		sphere.setSmooth(true);
-		console.log(sphere); */
-
-		// gow.filters = [];
-
-		// const speed = 1;
-		// const test = () => {
-		// 	const step = (speed * Math.PI) / 180;
-
-		// 	gowPortion.rotation += step;
-		// 	gowPortion.rotation -= step;
-
-		// 	requestAnimationFrame(test);
-		// };
-
-		// test();
-
-		// console.log(PIXI.Assets.resolver);
-
-		// console.log(PIXI.Assets.loader);
-
-		// const logo = PIXI.Texture.from("gow");
-
-		// 	bunny.x = window.innerWidth / 2;
-		// 	bunny.y = window.innerHeight / 2;
-		// 	bunny.scale.set(2);
-		// 	bunny.anchor.set(0.5);
-
-		// 	const filterCenter = [this.width, this.height];
-		// 	// this.test = await PIXI.Assets.loader.load(https://pixijs.com/assets/bunny.png);
-		// 	// this.addChild(testSprite);
-
-		// 	const shockwaveFilter = new filters.ShockwaveFilter(filterCenter, { radius: this.width, speed: 2 });
-		// 	// shockwaveFilter.center = [1, 1];
-		// 	this.filters = [shockwaveFilter];
-
-		// 	this.parent.addChild(this);
-		// 	this.addChild(bunny);
+		testGradient.x = gowPortion.width;
+		testGradient.rotation = (90 * Math.PI) / 180;
+		gowPortion.mask = testGradient;
 	}
 
 	renderSprite(texture?: PIXI.Texture) {
