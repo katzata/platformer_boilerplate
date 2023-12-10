@@ -1,26 +1,39 @@
 {
-  "name": "rollup-starter-app",
+  "name": "platformer_boilerplate_wp",
+  "version": "1.0.0",
+  "description": "platformer boilerplate webpack version",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "npx webpack serve --hot --config config.dev.js",
+    "build": "npx webpack build --config config.prod.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "K.Kashchiev",
+  "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.1.0",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "npm-run-all": "^4.1.5",
-    "rollup": "^2.36.2",
-    "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-terser": "^7.0.2",
-    "serve": "^11.3.2",
-    "tslib": "^2.6.2"
+    "@types/node": "^20.10.2",
+    "@types/webpack": "^5.28.5",
+    "@types/webpack-dev-server": "^4.7.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "css-minimizer-webpack-plugin": "^5.0.1",
+    "dev-server": "^0.2.0",
+    "html-webpack-plugin": "^5.5.3",
+    "json-loader": "^0.5.7",
+    "mini-css-extract-plugin": "^2.7.6",
+    "raw-loader": "^4.0.2",
+    "sass-loader": "^13.3.2",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "webpack-glsl-loader": "^1.0.1"
   },
   "dependencies": {
-    "date-fns": "^2.16.1",
-    "pixi.js": "^7.3.2",
-    "rollup-plugin-node-globals": "^1.4.0"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
-    "dev": "npm-run-all --parallel start watch",
-    "start": "serve public"
+    "events": "^3.3.0",
+    "pixi.js": "^7.3.2"
   }
 }

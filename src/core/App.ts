@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import Stage from "./Stage";
 
 export const appDefaults = {
 	background: "#000000",
@@ -14,14 +13,20 @@ export const appDefaults = {
 	backgroundColor: 0xa0a0a0,
 } as unknown as PIXI.IApplicationOptions;
 
+declare global {
+	interface Window {
+		app: PIXI.Application;
+	}
+}
+
 export default class Application extends PIXI.Application {
 	constructor(options?: PIXI.IApplicationOptions) {
 		super(options || appDefaults);
+		const canvas = this.view as HTMLCanvasElement;
+		window.app = this;
+		document.body.appendChild(canvas);
 
-		this.stage = new Stage();
-
-		document.body.appendChild(this.view as HTMLCanvasElement);
-
+		// @ts-ignore
 		globalThis.__PIXI_APP__ = this;
 	}
 }
