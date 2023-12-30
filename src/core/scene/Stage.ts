@@ -31,18 +31,6 @@ export default class Stage extends PIXI.Container {
 	}
 
 	async init(assets) {
-		const sceneName = "test";
-		console.log(assets);
-
-		// const scene = new Scene(this, sceneName, assets[sceneName]);
-		// console.log(scene.name);
-
-		// await new Promise((res) => {
-
-		// 	res(null);
-		// });
-
-		// console.log(this);
 		this.ready(assets);
 	}
 

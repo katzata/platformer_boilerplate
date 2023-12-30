@@ -1,5 +1,5 @@
-import { components, types } from "../core/core";
-import * as stageTypes from "../core/scene/Stage";
+import { components } from "../core/core";
+// import * as stageTypes from "../core/scene/Stage";
 import TestScene from "./scenes/TestScene";
 
 export default class Stage extends components.Stage {

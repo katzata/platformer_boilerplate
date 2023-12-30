@@ -6,7 +6,6 @@ import Stage from "./Stage";
 export default class App extends components.Application {
 	constructor() {
 		super();
-		console.log(assets);
 
 		this.stage = new Stage({ assets });
 	}
