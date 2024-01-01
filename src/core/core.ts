@@ -1,15 +1,26 @@
+import * as PIXI from "pixi.js";
 import filters from "./filters/filters";
 import effects from "./effects/effects";
-import controls from "./controls/controls";
+import controls, { controlsTypes } from "./controls/controls";
 import Application from "./App";
-import Stage from "./scene/Stage";
-import Scene from "./scene/Scene";
+import Stage, { stageTypes } from "./scene/Stage";
+import Scene, { sceneTypes } from "./scene/Scene";
+import Char, { charTypes } from "./scene/chars/Char";
 
-import * as stageTypes from "./scene/Stage";
+import * as utils from "./utils/utils";
 
-export const components = { Application, Scene, Stage };
-export { controls, effects, filters };
+export const components = { Application, Scene, Stage, Char };
+export namespace components2 {
+	Scene;
+}
+
+const emitter = new PIXI.utils.EventEmitter();
+
+export { controls, effects, filters, emitter, utils };
 
 export namespace types {
-	// export import StageTypes = stageTypes.StageScene;
+	export import StageScene = stageTypes.StageScene;
+	export import SceneOptions = sceneTypes.SceneOptions;
+	export import Char = charTypes.IChar;
+	export import Binding = controlsTypes.Binding;
 }

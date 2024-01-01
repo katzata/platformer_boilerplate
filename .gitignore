@@ -2,4 +2,3 @@
 node_modules
 package-lock.json
 public/bundle*
-game/assets/assetsManifest.json

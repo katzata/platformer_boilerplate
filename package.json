@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "platformer boilerplate webpack version",
   "main": "src/index.ts",
+  "module": "commonjs",
   "scripts": {
     "start": "npx webpack serve --hot --config config.dev.js",
     "build": "npx webpack build --config config.prod.js",
