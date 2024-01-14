@@ -5,7 +5,7 @@ export default class Stage extends components.Stage {
 	scenes = {
 		test: TestScene,
 	};
-	// constructor(scenes?: stageTypes.StageScene | null | undefined, options?: stageTypes.SceneOptions | undefined) {
+
 	constructor(scenes?: any, options?: any) {
 		super(scenes, options);
 	}

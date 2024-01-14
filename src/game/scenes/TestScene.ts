@@ -154,19 +154,6 @@ export default class TestScene extends components.Scene {
 		// this.addChild(whiteSprite);
 		this.addChild(container);
 
-		//
-		//
-		//
-		//
-		//
-		//
-		// this.circle = PIXI.Sprite.from("circle");
-		// this.circle.anchor.set(0.5);
-		// this.circle.x = window.innerWidth / 2;
-		// this.circle.y = window.innerHeight / 2;
-
-		// this.addChild(this.circle);
-
 		this.char = new components.Char("circle", {
 			bounds: {
 				x: {
@@ -204,25 +191,6 @@ export default class TestScene extends components.Scene {
 		this.char2.y = window.innerHeight / 2;
 
 		this.addChild(this.char2);
-
-		//
-		//
-		//
-		//
-		//
-		//
-
-		// const test = new Test(this);
-
-		// test.activate(positionsX);
-		// test.activate(positionsY);
-
-		// container.addChild(rofPortion);
-		// container.addChild(testGradient);
-
-		// testGradient.x = rofPortion.width;
-		// testGradient.rotation = (90 * Math.PI) / 180;
-		// rofPortion.mask = testGradient;
 	}
 
 	renderSprite(texture?: PIXI.Texture) {

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { controls } from "../core";
+import { controls, utils } from "../core";
 
 export namespace sceneTypes {
 	export interface SceneOptions {
@@ -55,7 +55,7 @@ export default class Scene extends PIXI.Container {
 	onLoad() {}
 
 	private handleBundles(bundle: string, fileName: string, extension: string) {
-		const normalizedName = this.handleSpaces(fileName);
+		const normalizedName = utils.removeSpaces(fileName);
 
 		if (!this.bundles[bundle]) {
 			this.bundles[bundle] = {};
@@ -64,16 +64,5 @@ export default class Scene extends PIXI.Container {
 		} else {
 			this.bundles[bundle][normalizedName] = `${fileName}.${extension}`;
 		}
-	}
-
-	// utils maybe ?
-	private handleSpaces(fileName: string) {
-		let newFileName = fileName;
-
-		while (newFileName.indexOf(" ") > -1) {
-			newFileName = newFileName.replace(" ", "_");
-		}
-
-		return newFileName;
 	}
 }

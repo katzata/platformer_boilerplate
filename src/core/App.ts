@@ -22,11 +22,10 @@ declare global {
 export default class Application extends PIXI.Application {
 	constructor(options?: PIXI.IApplicationOptions) {
 		super(options || appDefaults);
-		const canvas = this.view as HTMLCanvasElement;
-		window.app = this;
-		document.body.appendChild(canvas);
 
-		// @ts-ignore
+		document.body.appendChild(this.view as HTMLCanvasElement);
+
+		window.app = this;
 		globalThis.__PIXI_APP__ = this;
 	}
 }
