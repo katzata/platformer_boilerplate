@@ -1,6 +1,8 @@
 {
     "test": [
-        "./assets/scenes/test/gow.png",
+        "./assets/scenes/test/circle.png",
+        "./assets/scenes/test/circle2.png",
+        "./assets/scenes/test/rof.jpg",
         "./assets/scenes/test/even/gow copy 2.png",
         "./assets/scenes/test/even/gow copy 4.png",
         "./assets/scenes/test/even/gow copy.png",

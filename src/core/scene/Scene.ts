@@ -1,18 +1,25 @@
 import * as PIXI from "pixi.js";
+import { controls } from "../core";
+
+export namespace sceneTypes {
+	export interface SceneOptions {
+		assetPaths?: string[];
+	}
+}
 
 export default class Scene extends PIXI.Container {
 	name: string;
 	assets: any;
 	bundles: Record<string, Record<string, string>> = {};
+	controls?: typeof controls = controls;
 
-	constructor(parent: PIXI.Container, name: string, assetPaths?: string[]) {
+	constructor(name: string, options?: sceneTypes.SceneOptions) {
 		super();
 
-		this.name = name || `${parent} child ${parent.children.length - 1}`;
-		this.parent = parent;
-		this.assets = assetPaths;
+		this.name = name || "Scene";
 
-		parent.addChild(this);
+		if (options?.assetPaths) this.assets = options.assetPaths;
+
 		this.init();
 	}
 

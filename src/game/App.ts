@@ -1,4 +1,3 @@
-// import * as PIXI from "pixi.js";
 import assets from "./assets/assetsManifest.json";
 import { components } from "../core/core";
 import Stage from "./Stage";

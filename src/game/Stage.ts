@@ -1,5 +1,4 @@
 import { components } from "../core/core";
-// import * as stageTypes from "../core/scene/Stage";
 import TestScene from "./scenes/TestScene";
 
 export default class Stage extends components.Stage {
@@ -7,10 +6,13 @@ export default class Stage extends components.Stage {
 		test: TestScene,
 	};
 	// constructor(scenes?: stageTypes.StageScene | null | undefined, options?: stageTypes.SceneOptions | undefined) {
-	// 	super(scenes, options);
-	// }
+	constructor(scenes?: any, options?: any) {
+		super(scenes, options);
+	}
 
 	ready(assets) {
-		const newTestScene = new TestScene(this, "test", assets["test"]);
+		const newTestScene = new TestScene("test", { assetPaths: assets["test"] });
+
+		this.addChild(newTestScene);
 	}
 }

@@ -23,7 +23,8 @@ export default class Stage extends PIXI.Container {
 		super();
 
 		if (!scenes) {
-			new TestScene(this, "test");
+			const newTestScene = new TestScene("test");
+			this.addChild(newTestScene);
 			return;
 		}
 
