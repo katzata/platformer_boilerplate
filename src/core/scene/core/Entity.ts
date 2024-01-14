@@ -1,12 +1,11 @@
 import * as PIXI from "pixi.js";
 
-export interface MoveOptions {
-	duration?: number;
-	speed?: number;
-	accelDuration?: {
-		start: number;
-		end: number;
-	};
+interface EntityMovement {
+	move: (delta: number) => void;
+	axes: string[];
+	fps: number;
+	lastInputs?: string[];
+	inputsToStore: number;
 }
 
 interface EntityCoordBounds {
@@ -25,22 +24,28 @@ interface EntityCoordBounds {
 	limitToBounds: boolean;
 }
 
-interface EntityMovement {
-	move: () => void;
-	axes: string[];
-	fps: number;
+export interface EntityOptions {
+	bounds?: EntityCoordBounds;
+	scale?: Record<string, number>;
+	inputsToStore?: number;
 }
 
-interface IEntity {
-	movement: EntityMovement;
-	coordBounds: EntityCoordBounds;
+export interface EntityMoveOptions {
+	duration?: number;
+	speed?: number;
+	accelDuration?: {
+		start: number;
+		end: number;
+	};
 }
 
-export default class Entity extends PIXI.Sprite implements IEntity {
-	movement = {
+export default class Entity extends PIXI.Sprite {
+	movement: EntityMovement = {
 		move: null,
 		axes: ["x", "y"],
 		fps: 60,
+		lastInputs: [],
+		inputsToStore: 0,
 	};
 
 	coordBounds: EntityCoordBounds = {
@@ -59,16 +64,17 @@ export default class Entity extends PIXI.Sprite implements IEntity {
 		limitToBounds: false,
 	};
 
-	constructor(name: string, bounds?: EntityCoordBounds, scale?: Record<string, number>) {
+	constructor(name: string, options: EntityOptions) {
 		super();
 
 		this.texture = PIXI.Texture.from(name);
 		this.anchor.x = 0.5;
 		this.anchor.y = 0.5;
 
-		if (bounds.limitToBounds) this.coordBounds.limitToBounds = true;
+		if (options?.inputsToStore > 1) this.movement.inputsToStore = options.inputsToStore;
+		if (options.bounds.limitToBounds) this.coordBounds.limitToBounds = true;
 
-		this.initPositioning(bounds, scale);
+		this.initPositioning(options.bounds, options.scale);
 		this.initMovement();
 	}
 
@@ -109,7 +115,7 @@ export default class Entity extends PIXI.Sprite implements IEntity {
 	 * @param options.accelDuration.start The duration when starting from idle.
 	 * @param options.accelDuration.end The duration when stopping to idle.
 	 */
-	public move = async (dest: PIXI.Point, options?: MoveOptions): Promise<void> => {
+	public moveToCoords = async (dest: PIXI.Point, options?: EntityMoveOptions): Promise<void> => {
 		const direction = { x: 1, y: 1 };
 		const step = { x: 0, y: 0 };
 
@@ -160,7 +166,7 @@ export default class Entity extends PIXI.Sprite implements IEntity {
 		});
 	};
 
-	rotate(rotateTo: Record<any, any>) {
+	public rotate(rotateTo: Record<any, any>) {
 		this.rotation = -Math.atan2(this.x - rotateTo.x, this.y - rotateTo.y);
 	}
 }
