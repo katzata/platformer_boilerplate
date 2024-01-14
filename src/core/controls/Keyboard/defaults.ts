@@ -1,5 +1,5 @@
 export const keyboardDefaultMap = {
-	scheme1: {
+	mapping1: {
 		ArrowUp: "up",
 		ArrowDown: "down",
 		ArrowLeft: "left",
@@ -10,6 +10,18 @@ export const keyboardDefaultMap = {
 		KeyQ: "button4",
 		KeyW: "button5",
 		KeyE: "button6",
+	},
+	mapping2: {
+		Numpad8: "up",
+		Numpad5: "down",
+		Numpad4: "left",
+		Numpad6: "right",
+		KeyJ: "button1",
+		KeyK: "button2",
+		KeyL: "button3",
+		KeyU: "button4",
+		KeyI: "button5",
+		KeyO: "button6",
 	},
 };
 

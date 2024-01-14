@@ -63,3 +63,12 @@ export const delay = (delay: number | string, options?: types.DelayOptions) => {
 		PIXI.Ticker.shared.add(check);
 	});
 };
+
+/**
+ * Remove all spaces from a text.
+ * @param text The text that will be formatted
+ * @returns The formatted text.
+ */
+export const removeSpaces = (text: string) => {
+	return text.split(" ").join("");
+};

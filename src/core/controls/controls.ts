@@ -1,25 +1,17 @@
 import config from "./controlsConfig.json";
-import GamepadController, { gamepadTypes } from "./Gamepad/GamepadController";
+import GamepadController from "./Gamepad/GamepadController";
 import KeyboardController from "./Keyboard/KeyboardController";
-
-export namespace controlsTypes {
-	export interface Binding {
-		callback: (delta?: number) => void;
-	}
-
-	export interface KeyboardScheme {
-		[key: string]: Record<string, controlsTypes.Binding>;
-	}
-}
+import { controlsTypes, gamepadTypes, keyboardTypes } from "./types";
+import type Char from "../scene/chars/Char";
 
 class Controls {
 	config = config;
 	keyboard: KeyboardController;
-	gamepad: GamepadController;
+	gamepadController: GamepadController;
 
 	constructor() {
 		this.keyboard = new KeyboardController();
-		this.gamepad = new GamepadController();
+		this.gamepadController = new GamepadController();
 	}
 
 	/**
@@ -39,15 +31,15 @@ class Controls {
 	/**
 	 * Add a keyboard controls scheme.
 	 */
-	public addGamepadScheme(playerName: string, controlScheme: gamepadTypes.GamepadScheme) {
-		this.gamepad.addScheme(playerName, controlScheme);
+	public addGamepadScheme(player: Char, controlScheme?: gamepadTypes.GamepadScheme) {
+		this.gamepadController.addScheme(player.charName, controlScheme);
 	}
 
 	/**
 	 * Remove an already existing controls scheme.
 	 */
 	public removeGamepadScheme(playerName: string) {
-		this.gamepad.removeScheme(playerName);
+		this.gamepadController.removeScheme(playerName);
 	}
 }
 

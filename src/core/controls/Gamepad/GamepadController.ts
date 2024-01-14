@@ -1,188 +1,196 @@
 import * as PIXI from "pixi.js";
+import { controlsTypes, gamepadTypes } from "../types";
 import { gamepadDefaults, gamepadDefaultMap } from "./defaults";
 import { utils } from "../../core";
 
-export namespace gamepadTypes {
-	export interface GamepadScheme {
-		buttons?: Record<string, ButtonMap>;
-		axes?: {
-			bindings: AxesMap;
-			options: GamepadAxesOptions;
-		};
-	}
-
-	export interface GamepadAxesOptions {
-		normalize?: boolean;
-		invertLeftY?: boolean;
-		invertRightY?: boolean;
-	}
-
-	export interface ButtonMap {
-		action?: string;
-		playerId?: string;
-		callback?: (delta?: number) => void;
-	}
-
-	export interface AxesMap {
-		[key: string]: {
-			callback: (delta: number, offset: number) => void;
-		};
-	}
+interface Mapping extends controlsTypes.Binding {
+	active?: boolean;
 }
 
+interface ButtonMap extends gamepadTypes.GamepadScheme {
+	playerId?: string;
+	buttons?: Record<string, Mapping>;
+}
+
+/**
+ * Handles all gamepad instances.
+ *
+ * Applies default controller mapping and settings.
+ *
+ * Activates and deactivates a ticker (the ticker stops if no gamepads are connected).
+ */
 export default class GamepadController {
-	index: number = null;
-	keyBindings: Record<string, string> = {};
-	controlSchemes: gamepadTypes.GamepadScheme = {};
-	axesDeadZone: number = 0.099;
-	switchDPadToAnalog: boolean = false;
+	buttonMaps: ButtonMap[] = [];
+	controllerMaps: Record<string, string> = gamepadDefaultMap[0].scheme;
+	tickerActive: boolean = false;
+	settings: gamepadTypes.Settings = {
+		deadZone: 0.1,
+		autoFire: false,
+		autoFireExceptions: ["up", "down", "left", "right"],
+	};
 
 	constructor() {
-		window.addEventListener("gamepadconnected", this.initGamepad);
-		window.addEventListener("gamepaddisconnected", this.removeGamepad);
+		const inputCheck = (e) => this.handleInput(e);
+
+		window.addEventListener("gamepadconnected", () => {
+			if (!this.tickerActive) {
+				PIXI.Ticker.shared.add(inputCheck);
+				this.tickerActive = true;
+			}
+		});
+
+		window.addEventListener("gamepaddisconnected", () => {
+			const gamepadsCheck = window.navigator.getGamepads().filter((pad) => pad !== null).length === 0;
+
+			if (this.tickerActive && gamepadsCheck) {
+				PIXI.Ticker.shared.remove(inputCheck);
+				this.tickerActive = false;
+			}
+		});
 	}
 
 	/**
-	 * Initialize a gamepad and add a check function to the shared ticker.
-	 * @param e The initial gamepad event (when activated).
+	 * Add a controls scheme to the gamepad controller.
+	 * Replaces existing schemes if the playerName is the same.
+	 * @param playerName The player name.
+	 * @param controlScheme The player controls scheme.
 	 */
-	private initGamepad = (e: GamepadEvent) => {
-		const { id, index, buttons, axes } = e.gamepad;
+	public addScheme(playerName: string, controlScheme?: gamepadTypes.GamepadScheme) {
+		const playerId = utils.removeSpaces(playerName);
+		const index = this.buttonMaps.find((buttonMap, idx) => {
+			if (buttonMap.playerId) return idx;
+		}) as undefined as number;
 
-		this.index = index;
-		this.keyBindings = gamepadDefaultMap[0].scheme;
+		const buttons = this.formatScheme((controlScheme ?? gamepadDefaults).buttons);
+		const axes = (controlScheme ?? gamepadDefaults).axes;
 
-		console.log(`Gamepad : ${id} with ${buttons.length} buttons, ${axes.length} axes connected.`);
-		PIXI.Ticker.shared.add(this.onEvent);
-	};
-
-	private removeGamepad = (e: GamepadEvent) => {
-		console.log(`Gamepad : ${e.gamepad.id} disconnected.`);
-		PIXI.Ticker.shared.remove(this.onEvent);
-	};
-
-	/**
-	 * Monitor for button presses and analog stick movement
-	 * @returns void
-	 */
-	public onEvent = (delta: number) => {
-		if (isNaN(this.index)) return;
-
-		this.handleButtons(delta);
-		this.handleAnalogs(delta, { invertLeftY: false });
-	};
-
-	public addScheme(playerName: string, controlScheme: gamepadTypes.GamepadScheme) {
-		const filteredScheme = this.removeDuplicateKeys(playerName, controlScheme);
-		const newScheme = gamepadDefaults;
-		const playerId = utils.removeTextSpaces(playerName);
-
-		for (const key in filteredScheme) {
-			newScheme[key] = {
-				playerId,
-				...filteredScheme[key],
-			};
+		if (!index) {
+			this.buttonMaps.push({ playerId, buttons, axes });
+		} else {
+			this.buttonMaps[index] = { playerId, buttons, axes };
 		}
-
-		this.controlSchemes = newScheme;
-		Object.assign(this.controlSchemes, newScheme);
 	}
 
-	private removeDuplicateKeys(playerName: string, controlScheme: gamepadTypes.GamepadScheme) {
-		if (!this.controlSchemes?.buttons?.length && !this.controlSchemes?.axes?.bindings.length) return controlScheme;
+	/**
+	 * Add the necessary object keys to the control scheme mappings.
+	 * @param {gamepadTypes.GamepadScheme} scheme The player gamepad control scheme.
+	 * @returns A newly constructed object containing the additional keys.
+	 */
+	private formatScheme(scheme: Record<string, any>) {
+		const newScheme = { ...scheme };
+		let exceptions = [...this.settings.autoFireExceptions];
 
-		const playerId = utils.removeTextSpaces(playerName);
-		const filteredBindings = Object.entries(this.controlSchemes.buttons).filter(
-			(binding) => binding[1].playerId === playerId,
-		);
+		for (const key in scheme) {
+			newScheme[key] = scheme[key];
+			newScheme[key].active = false;
 
-		for (const [filteredKey, binding] of filteredBindings) {
-			for (const key in controlScheme) {
-				if (filteredKey !== key && controlScheme[key].callback) continue;
+			const index = exceptions.indexOf(key);
 
-				binding.callback = controlScheme[key].callback;
+			if (index > -1) {
+				newScheme[key].autoFireException = true;
+				exceptions = exceptions.splice(index, 1);
 			}
 		}
 
-		return filteredBindings;
+		return newScheme;
 	}
 
 	/**
 	 * Remove an already existing scheme
 	 */
 	public removeScheme(playerName: string) {
-		const playerId = utils.removeTextSpaces(playerName);
+		const playerId = utils.removeSpaces(playerName);
+		this.buttonMaps = this.buttonMaps.filter((buttonMap) => buttonMap.playerId !== playerId);
+	}
 
-		const toRemove = Object.entries({
-			...this.controlSchemes.buttons,
-			...this.controlSchemes.axes.bindings,
-		}).filter((binding) => (binding[1] as gamepadTypes.ButtonMap).playerId === playerId);
+	/**
+	 * Handle button and analog stick input.
+	 * Will be passed to the pixi ticker.
+	 */
+	private handleInput(delta: number) {
+		const gamepads = window.navigator.getGamepads();
+		let playerIdx = 0;
 
-		for (const [key] of toRemove) {
-			if (this.controlSchemes[key]) delete this.controlSchemes[key];
+		for (let i = 0; i < gamepads.length; i++) {
+			if (!gamepads[i] || !this.buttonMaps[playerIdx]) continue;
+
+			this.handleButtons(delta, playerIdx, gamepads[i]);
+			this.handleAnalogs(delta, playerIdx, gamepads[i]);
+
+			playerIdx++;
 		}
 	}
 
 	/**
 	 * Handle all button presses.
+	 * Block buttons in order to prevent auto fire if necessary (accepts exceptions).
 	 * @param {controlsTypes.GamepadExtended} gamepad The actual Gamepad instance.
-	 * @returns void
 	 */
-	private handleButtons(delta: number) {
-		const buttons = this.getGamepad().buttons;
-		const pressed = [];
-		let end = buttons.length - 1;
+	private handleButtons(delta: number, playerIdx: number, gamepad: Gamepad) {
+		const buttons = gamepad.buttons;
+		const bindingCheck = (binding) => {
+			return !this.settings.autoFire ? binding?.autoFireException ?? !binding?.active : true;
+		};
 
 		for (let i = 0; i < buttons.length; i++) {
-			if (buttons[i].pressed) pressed.push(i);
-			if (i === end) break;
-			if (buttons[end--].pressed) pressed.push(end);
-		}
+			const end = buttons.length - 1 - i;
+			const binding = this.buttonMaps[playerIdx].buttons[this.controllerMaps[i]];
+			const binding2 = this.buttonMaps[playerIdx].buttons[this.controllerMaps[end]];
 
-		if (!pressed.length) return;
+			if (!buttons[i].pressed && binding?.active) binding.active = false;
+			if (!buttons[end].pressed && binding2?.active) binding2.active = false;
 
-		for (const key of pressed) {
-			if (!this.keyBindings[key] || !this.controlSchemes.buttons[this.keyBindings[key]]) continue;
+			if (!this.controllerMaps[i] || !this.buttonMaps[playerIdx].buttons[this.controllerMaps[i]]) continue;
+			if (i >= end) break;
 
-			const binding = this.controlSchemes.buttons[this.keyBindings[key]];
+			if (buttons[i].pressed && bindingCheck(binding) && binding?.callback) {
+				binding.callback(delta);
+				binding.active = true;
+			}
 
-			if (binding.callback) binding.callback(delta);
+			if (buttons[end].pressed && bindingCheck(binding2) && binding2?.callback) {
+				binding2.callback(delta);
+				binding2.active = true;
+			}
 		}
 	}
 
 	/**
-	 * Get the corrected axes offset
-	 * @param index The gamepad that is currently firing the event.
-	 * @returns An array consisting of the gamepad's analog sticks offsets.
+	 * Handle analog stick offsets....
+	 * Apply dead zone.
+	 * Apply Y axis inversion.
+	 * Trigger a predefined
+	 * @param delta Delta from the pixi ticker.
+	 * @param playerIdx The player index.
+	 * @param gamepad The gamepad from the api.
 	 */
-	private handleAnalogs(delta: number, options?: gamepadTypes.GamepadAxesOptions) {
-		const axes = this.getGamepad().axes.map((value, idx) => {
-			const test = true;
-			let offsetL = test ? value * -1 : value;
+	private handleAnalogs(delta: number, playerIdx: number, gamepad: Gamepad) {
+		const invertLeftY = this.buttonMaps[playerIdx].axes?.options.invertLeftY;
+		const invertRightY = this.buttonMaps[playerIdx].axes?.options.invertRightY;
+
+		const buttons = this.buttonMaps[playerIdx].buttons;
+		const axes = Object.entries(this.buttonMaps[playerIdx].axes.bindings);
+
+		for (let i = 0; i < gamepad.axes.length; i++) {
 			let directionCalc =
-				value > 0
-					? (value - this.axesDeadZone) / (1 - this.axesDeadZone)
-					: (value - this.axesDeadZone * -1) / (1 - this.axesDeadZone);
+				gamepad.axes[i] > 0
+					? (gamepad.axes[i] - this.settings.deadZone) / (1 - this.settings.deadZone)
+					: (gamepad.axes[i] - this.settings.deadZone * -1) / (1 - this.settings.deadZone);
 
-			if (options?.invertLeftY && idx === 1) directionCalc = directionCalc * -1;
-			if (options?.invertRightY && idx === 3) directionCalc = directionCalc * -1;
+			if ((invertLeftY && i === 1) || (invertRightY && i === 3)) directionCalc *= -1;
+			if (Math.abs(gamepad.axes[i]) < this.settings.deadZone) continue;
 
-			return Math.abs(offsetL) > this.axesDeadZone ? directionCalc : 0;
-		});
+			const [action, func] = axes[i];
 
-		for (let i = 0; i < axes.length; i++) {
-			if (axes[i] === 0) continue;
+			if (
+				(action === "moveX" || action === "moveY") &&
+				(buttons.left.active || buttons.right.active || buttons.up.active || buttons.down.active) &&
+				directionCalc !== 0
+			) {
+				continue;
+			}
 
-			this.controlSchemes.axes.bindings[i]?.callback(delta, axes[i]);
+			func?.callback(delta, directionCalc);
 		}
-	}
-
-	/**
-	 * Get the currently assigned gamepad.
-	 * @param {number} index The gamepad index.
-	 * @returns The gamepad reference.
-	 */
-	private getGamepad() {
-		return window.navigator.getGamepads()[this.index];
 	}
 }

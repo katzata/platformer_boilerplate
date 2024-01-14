@@ -1,0 +1,13 @@
+export interface SpritePortionOptions {
+	frame?: {
+		x?: number;
+		y?: number;
+		width?: number;
+		height?: number;
+	};
+}
+
+export interface DelayOptions {
+	callBack?: () => any;
+	repeat?: boolean;
+}

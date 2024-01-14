@@ -1,35 +1,34 @@
 import * as PIXI from "pixi.js";
 import { keyboardDefaults, keyboardDefaultMap } from "./defaults";
+import { controlsTypes, keyboardTypes } from "../types";
 import { utils } from "../../core";
 
-export namespace keyboardTypes {
-	export interface KeyMap {
-		action?: string;
-		active?: boolean;
-		playerId?: string;
-		callback?: (delta?: number) => void;
-	}
-}
-
+/**
+ * Handles all keyboard presses.
+ *
+ * Applies default keyboard mapping and settings.
+ */
 export default class KeyboardController {
-	keyBindings: Record<string, string> = {};
+	keyBindings: Record<string, keyboardTypes.KeyMap> = {};
 	controlSchemes: Record<string, keyboardTypes.KeyMap> = {};
 	defaults: Record<string, Record<string, string>> = keyboardDefaultMap;
+	activeKeys: keyboardTypes.KeyMap[] = [];
+	players: Record<string, Record<string, string>> = {
+		"1": null,
+		"2": null,
+	};
+	settings: keyboardTypes.Settings = {
+		autoFire: false,
+		autoFireExceptions: ["up", "down", "left", "right"],
+	};
 
 	constructor() {
 		window.addEventListener("keydown", this.onEvent);
 		window.addEventListener("keyup", this.onEvent);
 
-		this.initBindings();
+		// this.initBindings();
 
 		PIXI.Ticker.shared.add(this.monitorKeys);
-	}
-
-	/**
-	 * Initialize the keyboard bindings
-	 */
-	private initBindings() {
-		this.keyBindings = this.defaults.scheme1;
 	}
 
 	/**
@@ -37,53 +36,35 @@ export default class KeyboardController {
 	 * @param playerName The name of the player that will use the controls scheme.
 	 * @param controlScheme The controls scheme.
 	 */
-	public addScheme(playerName: string, controlScheme: Record<string, keyboardTypes.KeyMap>) {
-		const filteredScheme = this.removeDuplicateKeys(playerName, controlScheme);
-		const newScheme = {};
-		const playerId = utils.removeTextSpaces(playerName);
+	public addScheme(playerName: string, controlScheme: Record<string, controlsTypes.Binding>) {
+		let newScheme = {};
+		const playerId = utils.removeSpaces(playerName);
 
-		for (const key in filteredScheme) {
-			newScheme[key] = {
-				active: false,
-				playerId,
-				...filteredScheme[key],
-			};
-		}
+		for (const [index, data] of Object.entries(this.players)) {
+			if (!data) {
+				const mapping = { ...this.defaults[`mapping${index}`] };
 
-		Object.assign(this.controlSchemes, newScheme);
-		console.log(this.controlSchemes);
-	}
+				for (const key in mapping) {
+					newScheme[key] = {
+						...controlScheme[mapping[key]],
+						active: false,
+						playerId,
+					};
+				}
 
-	/**
-	 * Apply new keys over existing ones.
-	 * @param playerName The name of the player that has used the controls scheme.
-	 * @param controlScheme The controls scheme.
-	 * @returns The updated key bindings.
-	 */
-	private removeDuplicateKeys(playerName: string, controlScheme: Record<string, keyboardTypes.KeyMap>) {
-		if (!Object.keys(this.controlSchemes).length) return controlScheme;
-
-		const playerId = utils.removeTextSpaces(playerName);
-		const filteredBindings = Object.entries(this.controlSchemes).filter(
-			(binding) => binding[1].playerId === playerId,
-		);
-
-		for (const [filteredKey, binding] of filteredBindings) {
-			for (const key in controlScheme) {
-				if (filteredKey !== key && controlScheme[key].callback) continue;
-
-				binding.callback = controlScheme[key].callback;
+				this.players[index] = newScheme;
+				break;
 			}
 		}
 
-		return filteredBindings;
+		Object.assign(this.keyBindings, newScheme);
 	}
 
 	/**
 	 * Remove an already existing scheme
 	 */
 	public removeScheme(playerName: string) {
-		const playerId = utils.removeTextSpaces(playerName);
+		const playerId = utils.removeSpaces(playerName);
 		const toRemove = Object.entries(this.controlSchemes).filter((binding) => binding[1].playerId === playerId);
 
 		for (const [key] of toRemove) {
@@ -96,9 +77,11 @@ export default class KeyboardController {
 	 * @param delta The difference between each frame.
 	 */
 	private monitorKeys = (delta: number) => {
-		for (const key in this.controlSchemes) {
-			if (this.controlSchemes[key].active && this.controlSchemes[key].callback) {
-				this.controlSchemes[key].callback(delta);
+		const keys = [...this.activeKeys];
+
+		for (const key of keys) {
+			if (key.active && key.callback) {
+				key.callback(delta);
 			}
 		}
 	};
@@ -112,14 +95,21 @@ export default class KeyboardController {
 		const keyBinding = this.keyBindings[keyEvent.code];
 
 		if (keyBinding) {
-			if (!this.controlSchemes[keyBinding]?.callback) {
+			if (!keyBinding?.callback) {
 				console.warn(`Key binding ${keyEvent.code} is not assigned.`);
 				return;
 			}
 
-			if (this.controlSchemes[keyBinding].active === keyState) return;
+			if (keyBinding.active === keyState) return;
 
-			this.controlSchemes[keyBinding].active = keyState;
+			keyBinding.active = keyState;
+
+			if (keyState) {
+				this.activeKeys.push(keyBinding);
+			} else {
+				const index = this.activeKeys.indexOf(keyBinding);
+				this.activeKeys.splice(index, 1);
+			}
 		}
 	};
 }
