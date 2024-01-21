@@ -1,21 +1,32 @@
 const path = require("path");
+const { argv } = require("process");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const assetsManifest = require("./scripts/assetsManifest");
+const PrepareAssets = require("./plugins/PrepareAssets");
+const { parseArgs } = require("./scripts/parseArgs");
 
-assetsManifest({
-	extensions: ["png"],
-});
+const args = parseArgs(argv);
+const { mode } = Object.fromEntries(args);
+const destFolder = mode === "development" ? "public" : "build";
 
 module.exports = {
-	mode: "development",
 	entry: {
 		main: "./src/index.ts",
 	},
 	module: {
 		rules: [
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				use: {
+					loader: "babel-loader",
+					options: {
+						presets: ["@babel/preset-env"],
+					},
+				},
+			},
 			{
 				test: /.s?css$/,
 				use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
@@ -38,7 +49,7 @@ module.exports = {
 		extensions: [".ts", ".js"],
 	},
 	output: {
-		path: path.join(__dirname, "public"),
+		path: path.join(__dirname, destFolder),
 		publicPath: "",
 		filename: "bundle.js",
 	},
@@ -46,13 +57,14 @@ module.exports = {
 		new CleanWebpackPlugin({
 			dry: false,
 			verbose: false,
-			cleanOnceBeforeBuildPatterns: ["public"],
+			cleanAfterEveryBuildPatterns: [destFolder],
 		}),
 		new CopyPlugin({
-			patterns: [
-				{ from: `./src/game/assets`, to: "assets" },
-				{ from: `./src/styles`, to: "styles" },
-			],
+			patterns: [{ from: `./src/styles`, to: "styles" }],
+		}),
+		new PrepareAssets({
+			allowedExtensions: ["png", "json"],
+			destFolder,
 		}),
 		new HtmlWebpackPlugin({
 			title: "Platformer boilerplate",
@@ -60,8 +72,11 @@ module.exports = {
 		}),
 	],
 	devServer: {
+		devMiddleware: {
+			writeToDisk: true,
+		},
 		static: {
-			directory: path.join(__dirname, "public"),
+			directory: path.join(__dirname, destFolder),
 		},
 		compress: true,
 		port: 9000,
