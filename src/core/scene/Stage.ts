@@ -16,24 +16,28 @@ export namespace stageTypes {
 }
 
 export default class Stage extends PIXI.Container {
-	scenes: Record<string, Function> = {};
+	scenes: string[];
 	assetManager: PIXI.AssetsClass;
 
-	constructor(scenes?: stageTypes.StageScene | null, options?: stageTypes.SceneOptions) {
+	constructor() {
 		super();
 
-		if (!scenes) {
+		this.scenes = ["test"];
+
+		this.init();
+	}
+
+	async init() {
+		const sceneAssets = await fetch("./assets/assetsManifest.json").then((res) => res.json());
+
+		if (!this.scenes) {
 			const newTestScene = new TestScene("test");
 			this.addChild(newTestScene);
 			return;
 		}
 
-		this.init(scenes.assets);
+		this.onLoad(sceneAssets);
 	}
 
-	async init(assets) {
-		this.ready(assets);
-	}
-
-	ready(assets: Record<string, string>) {}
+	onLoad(assets: Record<string, string>) {}
 }

@@ -1,7 +1,7 @@
 import config from "./controlsConfig.json";
 import GamepadController from "./Gamepad/GamepadController";
 import KeyboardController from "./Keyboard/KeyboardController";
-import { controlsTypes, gamepadTypes, keyboardTypes } from "./types";
+import { controlsTypes, gamepadTypes } from "./types";
 import type Char from "../scene/chars/Char";
 
 class Controls {
@@ -17,7 +17,7 @@ class Controls {
 	/**
 	 * Add a keyboard controls scheme.
 	 */
-	public addKeyboardScheme(playerName: string, controlScheme: Record<string, controlsTypes.Binding>) {
+	public addKeyboardScheme(playerName: string, controlScheme?: Record<string, controlsTypes.Binding>) {
 		this.keyboard.addScheme(playerName, controlScheme);
 	}
 

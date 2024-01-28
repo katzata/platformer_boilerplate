@@ -1,155 +1,80 @@
 export const gamepadDefaults = {
 	buttons: {
-		up: {
-			// Uncomment to stop auto execution of the directional keys.
-			// Enabled by default
-			// autoFireException: false,
-			callback: (delta: number) => console.log("up"),
+		up: (delta?: number) => {
+			console.log("up");
 		},
-		down: {
-			// Uncomment to stop auto execution of the directional keys.
-			// Enabled by default
-			// autoFireException: false,
-			callback: (delta: number) => console.log("down"),
+		down: (delta?: number) => {
+			console.log("down");
 		},
-		left: {
-			// Uncomment to stop auto execution of the directional keys.
-			// Enabled by default
-			// autoFireException: false,
-			callback: (delta: number) => console.log("left"),
+		left: (delta?: number) => {
+			console.log("left");
 		},
-		right: {
-			// Uncomment to stop auto execution of the directional keys.
-			// Enabled by default
-			// autoFireException: false,
-			callback: (delta: number) => console.log("right"),
+		right: (delta?: number) => {
+			console.log("right");
 		},
-		button0: {
-			// Uncomment to start auto execution of button0 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button0"),
+		button0: (delta?: number) => {
+			console.log("button 0");
 		},
-		button1: {
-			// Uncomment to start auto execution of button1 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button1"),
+		button1: (delta?: number) => {
+			console.log("button 1");
 		},
-		button2: {
-			// Uncomment to start auto execution of button2 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button2"),
+		button2: (delta?: number) => {
+			console.log("button 2");
 		},
-		button3: {
-			// Uncomment to start auto execution of button3 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button3"),
+		button3: (delta?: number) => {
+			console.log("button 3");
 		},
-		button4: {
-			// Uncomment to start auto execution of button4 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button4"),
+		button4: (delta?: number) => {
+			console.log("button 4");
 		},
-		button5: {
-			// Uncomment to start auto execution of button5 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button5"),
+		button5: (delta?: number) => {
+			console.log("button 5");
 		},
-		button6: {
-			// Uncomment to start auto execution of button6 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button6"),
+		button6: (delta?: number) => {
+			console.log("button 6");
 		},
-		button7: {
-			// Uncomment to start auto execution of button7 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button7"),
+		button7: (delta?: number) => {
+			console.log("button 7");
 		},
-		button8: {
-			// Uncomment to start auto execution of button8 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button8"),
+		button8: (delta?: number) => {
+			console.log("button 8");
 		},
-		button9: {
-			// Uncomment to start auto execution of button9 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button9"),
+		button9: (delta?: number) => {
+			console.log("button 9");
 		},
-		button10: {
-			// Uncomment to start auto execution of button10 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button10"),
+		button10: (delta?: number) => {
+			console.log("button 10");
 		},
-		button11: {
-			// Uncomment to start auto execution of button11 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button11"),
+		button11: (delta?: number) => {
+			console.log("button 11");
 		},
-		button12: {
-			// Uncomment to start auto execution of button12 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button12"),
+		button12: (delta?: number) => {
+			console.log("button 12");
 		},
-		button13: {
-			// Uncomment to start auto execution of button13 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button13"),
+		button13: (delta?: number) => {
+			console.log("button 13");
 		},
-		button14: {
-			// Uncomment to start auto execution of button14 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button14"),
+		button14: (delta?: number) => {
+			console.log("button 14");
 		},
-		button15: {
-			// Uncomment to start auto execution of button15 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button15"),
+		button15: (delta?: number) => {
+			console.log("button 15");
 		},
-		button16: {
-			// Uncomment to start auto execution of button16 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button16"),
+		button16: (delta?: number) => {
+			console.log("button 16");
 		},
-		button17: {
-			// Uncomment to start auto execution of button17 !!!will override the set auto fire behavior!!!.
-			// Disabled by default
-			// autoFireException: true,
-			callback: (delta: number) => console.log("button17"),
+		button17: (delta?: number) => {
+			console.log("button 17");
 		},
 	},
 	axes: {
 		bindings: {
-			moveX: {
-				callback: (delta: number, offset: number) => console.log("axis 0", offset),
-			},
-			moveY: {
-				callback: (delta: number, offset: number) => console.log("axis 1", offset),
-			},
-			cameraX: {
-				callback: (delta: number, offset: number) => console.log("axis 2", offset),
-			},
-			cameraY: {
-				callback: (delta: number, offset: number) => console.log("axis 3", offset),
-			},
+			moveX: (delta?: number, offset?: number) => console.log("axis 1", offset),
+			moveY: (delta?: number, offset?: number) => console.log("axis 1", offset),
+			cameraX: (delta?: number, offset?: number) => console.log("axis 2", offset),
+			cameraY: (delta?: number, offset?: number) => console.log("axis 2", offset),
 		},
 		options: {
-			normalize: false,
 			invertLeftY: false,
 			invertRightY: false,
 		},

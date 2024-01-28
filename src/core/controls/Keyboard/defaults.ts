@@ -26,37 +26,15 @@ export const keyboardDefaultMap = {
 };
 
 export const keyboardDefaults = {
-	up: {
-		callback: (delta: number) => console.log("up"),
-	},
-	down: {
-		callback: (delta: number) => console.log("down"),
-	},
-	left: {
-		callback: (delta: number) => console.log("left"),
-	},
-	right: {
-		callback: (delta: number) => console.log("right"),
-	},
-	button0: {
-		callback: (delta: number) => console.log("button0"),
-	},
-	button1: {
-		callback: (delta: number) => console.log("button1"),
-	},
-	button2: {
-		callback: (delta: number) => console.log("button2"),
-	},
-	button3: {
-		callback: (delta: number) => console.log("button3"),
-	},
-	button4: {
-		callback: (delta: number) => console.log("button4"),
-	},
-	button5: {
-		callback: (delta: number) => console.log("button5"),
-	},
-	button6: {
-		callback: (delta: number) => console.log("button6"),
-	},
+	up: (delta?: number) => console.log("up"),
+	down: (delta?: number) => console.log("down"),
+	left: (delta?: number) => console.log("left"),
+	right: (delta?: number) => console.log("right"),
+	button0: (delta?: number) => console.log("button0"),
+	button1: (delta?: number) => console.log("button1"),
+	button2: (delta?: number) => console.log("button2"),
+	button3: (delta?: number) => console.log("button3"),
+	button4: (delta?: number) => console.log("button4"),
+	button5: (delta?: number) => console.log("button5"),
+	button6: (delta?: number) => console.log("button6"),
 };
