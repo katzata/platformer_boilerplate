@@ -1,4 +1,4 @@
-export interface SpritePortionOptions {
+export interface TexturePortionOptions {
 	frame?: {
 		x?: number;
 		y?: number;

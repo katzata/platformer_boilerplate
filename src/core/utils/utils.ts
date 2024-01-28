@@ -5,10 +5,13 @@ import * as types from "./utilTypes";
  * Generate a portion of an already cached texture.
  * @param baseTextureName The cached texture name.
  * @param {Object} options Parameters for the new texture.
- * @param {types.SpritePortionOptions} options.frame The portion of the image to be displayed.
+ * @param {types.TexturePortionOptions} options.frame The portion of the image to be displayed.
  * @returns Either a portion of a texture, or a white square texture.
  */
-export const generateTexturePortion = async (baseTextureName: string, options?: types.SpritePortionOptions) => {
+export const generateTexturePortion = async (
+	baseTextureName: string,
+	options?: types.TexturePortionOptions,
+) => {
 	try {
 		const baseTexture = PIXI.BaseTexture.from(baseTextureName);
 
@@ -71,4 +74,15 @@ export const delay = (delay: number | string, options?: types.DelayOptions) => {
  */
 export const removeSpaces = (text: string) => {
 	return text.split(" ").join("");
+};
+
+/**
+ * Clamp a value to a minimum and a maximum.
+ * @param value The number that will be clamped.
+ * @param min Minimum value to clamp to.
+ * @param max Maximum value to clamp to.
+ * @returns The clamped value.
+ */
+export const clampNumber = (value: number, min: number, max: number) => {
+	return Math.max(Math.min(value, min), max);
 };
