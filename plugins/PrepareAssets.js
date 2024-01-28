@@ -10,30 +10,33 @@ module.exports = class PrepareAssets {
 	}
 
 	apply(compiler) {
-		compiler.hooks.afterEmit.tap("Hello World Plugin", (stats) => this.assetsManifest());
+		compiler.hooks.afterEmit.tap("Assets Manifest Plugin", (stats) => this.assetsManifest(stats));
 	}
 
-	assetsManifest() {
+	assetsManifest(stats) {
 		const { allowedExtensions, destFolder } = this.options;
 		let totalAssets = 0;
 
-		for (let i = 0; i < this.assetsFolder.length; i++) {
-			if (this.assetsFolder[i].indexOf("\\") === -1) {
-				this.manifest[this.assetsFolder[i]] = [];
+		for (const asset of this.assetsFolder) {
+			if (asset.indexOf("\\") === -1) {
+				this.manifest[asset] = [];
 			} else {
-				const filePath = this.getFilePath(this.assetsFolder[i]);
+				const filePath = this.getFilePath(asset);
 
 				if (!filePath) continue;
 				if (!allowedExtensions.filter((ext) => filePath.indexOf(ext) > -1)[0]) continue;
 
-				const key = this.assetsFolder[i].split("\\")[0];
-				const file = filePath.match(/\/\w*\.\w*$/)[0];
-				const folder = filePath.slice(0, filePath.length - file.length);
+				const originPath = `${asset.split("\\").join("/")}`;
+				const key = asset.split("\\")[0];
+				const file = originPath.match(/\/\w*\.\w*$/)[0];
+				const folder = `assets/scenes/${originPath.slice(0, originPath.length - file.length)}`;
 
-				if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+				if (!fs.existsSync(`./${this.options.destFolder}/${folder}`))
+					fs.mkdirSync(`./${this.options.destFolder}/${folder}`, { recursive: true });
+
 				this.copyFile(`./src/game/${filePath.slice(destFolder.length + 3)}`, filePath);
 
-				if (this.manifest[key]) this.manifest[key].push(filePath);
+				if (this.manifest[key]) this.manifest[key].push(`./${folder}/${file}`);
 				totalAssets++;
 			}
 		}
@@ -61,13 +64,13 @@ module.exports = class PrepareAssets {
 				if (err) console.log("Error Found:\n", err);
 			});
 
-			assetsLog[assetKey] = fs.statSync(from).size;
+			this.assetsLog[assetKey] = fs.statSync(from).size;
 		};
 
 		try {
 			copy(from, filePath);
 		} catch (err) {
-			if (assetsLog[assetKey] === fs.statSync(from).size) return;
+			if (fs.statSync(from) && this.assetsLog[assetKey] === fs.statSync(from).size) return;
 
 			fs.unlinkSync(filePath);
 			copy(from, filePath);
@@ -75,7 +78,7 @@ module.exports = class PrepareAssets {
 	}
 
 	getFilePath(string) {
-		let isPath = string.indexOf(".") >= 0 ? string : null;
-		return isPath ? `./${this.options.destFolder}/assets/scenes/${isPath.split("\\").join("/")}` : null;
+		const path = string.indexOf(".") >= 0 ? string : null;
+		return path ? `./${this.options.destFolder}/assets/scenes/${path.split("\\").join("/")}` : null;
 	}
 };
