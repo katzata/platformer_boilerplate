@@ -1,5 +1,6 @@
 const path = require("path");
 const { argv } = require("process");
+const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
@@ -57,7 +58,9 @@ module.exports = {
 		new CleanWebpackPlugin({
 			dry: false,
 			verbose: false,
-			cleanAfterEveryBuildPatterns: [destFolder],
+		}),
+		new webpack.DefinePlugin({
+			"process.env.NODE_ENV": JSON.stringify(mode),
 		}),
 		new CopyPlugin({
 			patterns: [{ from: `./src/styles`, to: "styles" }],
