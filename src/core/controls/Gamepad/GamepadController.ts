@@ -1,15 +1,11 @@
 import * as PIXI from "pixi.js";
-import { controlsTypes, gamepadTypes } from "../types";
+import { gamepadTypes } from "../types";
 import { gamepadDefaults, gamepadDefaultMap } from "./defaults";
 import { utils } from "../../core";
 
-interface Mapping extends controlsTypes.Binding {
-	active?: boolean;
-}
-
-interface ButtonMap extends gamepadTypes.GamepadScheme {
+interface ButtonMap {
 	playerId?: string;
-	buttons?: Record<string, Mapping>;
+	scheme: gamepadTypes.GamepadScheme;
 }
 
 /**
@@ -61,13 +57,13 @@ export default class GamepadController {
 			if (buttonMap.playerId) return idx;
 		}) as undefined as number;
 
-		const buttons = this.formatScheme((controlScheme ?? gamepadDefaults).buttons);
-		const axes = (controlScheme ?? gamepadDefaults).axes;
+		const buttons = this.formatButtons((controlScheme ?? gamepadDefaults).buttons);
+		const axes = this.formatAxes(gamepadDefaults.axes);
 
 		if (!index) {
-			this.buttonMaps.push({ playerId, buttons, axes });
+			this.buttonMaps.push({ playerId, scheme: { buttons, axes } });
 		} else {
-			this.buttonMaps[index] = { playerId, buttons, axes };
+			this.buttonMaps[index] = { playerId, scheme: { buttons, axes } };
 		}
 	}
 
@@ -76,20 +72,39 @@ export default class GamepadController {
 	 * @param {gamepadTypes.GamepadScheme} scheme The player gamepad control scheme.
 	 * @returns A newly constructed object containing the additional keys.
 	 */
-	private formatScheme(scheme: Record<string, any>) {
+	private formatButtons(scheme: Record<string, any>) {
 		const newScheme = { ...scheme };
 		let exceptions = [...this.settings.autoFireExceptions];
 
 		for (const key in scheme) {
-			newScheme[key] = scheme[key];
+			newScheme[key].callback = scheme[key];
 			newScheme[key].active = false;
 
-			const index = exceptions.indexOf(key);
+			if (exceptions.indexOf(key) > -1) newScheme[key].autoFireException = true;
+		}
 
-			if (index > -1) {
-				newScheme[key].autoFireException = true;
-				exceptions = exceptions.splice(index, 1);
-			}
+		return newScheme;
+	}
+
+	/**
+	 * Format the axes control scheme.
+	 * @param axesScheme The axes control scheme.
+	 * @returns A new ButtonMap.
+	 */
+	private formatAxes(axesScheme: Record<string, any>) {
+		const newScheme = {
+			bindings: {},
+			options: axesScheme.options,
+		};
+
+		for (const key in axesScheme.bindings) {
+			if (!axesScheme.bindings[key]) continue;
+
+			newScheme.bindings[key] = {
+				callback: axesScheme.bindings[key],
+				active: false,
+				autoFireException: this.settings.autoFireExceptions.indexOf(key) > -1,
+			};
 		}
 
 		return newScheme;
@@ -134,19 +149,21 @@ export default class GamepadController {
 
 		for (let i = 0; i < buttons.length; i++) {
 			const end = buttons.length - 1 - i;
-			const binding = this.buttonMaps[playerIdx].buttons[this.controllerMaps[i]];
-			const binding2 = this.buttonMaps[playerIdx].buttons[this.controllerMaps[end]];
+			const binding = this.buttonMaps[playerIdx].scheme.buttons[this.controllerMaps[i]];
+			const binding2 = this.buttonMaps[playerIdx].scheme.buttons[this.controllerMaps[end]];
 
 			if (!buttons[i].pressed && binding?.active) binding.active = false;
 			if (!buttons[end].pressed && binding2?.active) binding2.active = false;
 
-			if (!this.controllerMaps[i] || !this.buttonMaps[playerIdx].buttons[this.controllerMaps[i]]) continue;
-			if (i >= end) break;
+			if (!this.controllerMaps[i] || !this.buttonMaps[playerIdx].scheme.buttons[this.controllerMaps[i]])
+				continue;
 
 			if (buttons[i].pressed && bindingCheck(binding) && binding?.callback) {
 				binding.callback(delta);
 				binding.active = true;
 			}
+
+			if (i >= end) break;
 
 			if (buttons[end].pressed && bindingCheck(binding2) && binding2?.callback) {
 				binding2.callback(delta);
@@ -165,11 +182,11 @@ export default class GamepadController {
 	 * @param gamepad The gamepad from the api.
 	 */
 	private handleAnalogs(delta: number, playerIdx: number, gamepad: Gamepad) {
-		const invertLeftY = this.buttonMaps[playerIdx].axes?.options.invertLeftY;
-		const invertRightY = this.buttonMaps[playerIdx].axes?.options.invertRightY;
+		const invertLeftY = this.buttonMaps[playerIdx].scheme.axes?.options.invertLeftY;
+		const invertRightY = this.buttonMaps[playerIdx].scheme.axes?.options.invertRightY;
 
-		const buttons = this.buttonMaps[playerIdx].buttons;
-		const axes = Object.entries(this.buttonMaps[playerIdx].axes.bindings);
+		const buttons = this.buttonMaps[playerIdx].scheme.buttons;
+		const axes = Object.entries(this.buttonMaps[playerIdx].scheme.axes.bindings);
 
 		for (let i = 0; i < gamepad.axes.length; i++) {
 			let directionCalc =
@@ -180,7 +197,7 @@ export default class GamepadController {
 			if ((invertLeftY && i === 1) || (invertRightY && i === 3)) directionCalc *= -1;
 			if (Math.abs(gamepad.axes[i]) < this.settings.deadZone) continue;
 
-			const [action, func] = axes[i];
+			const [action, binding] = axes[i];
 
 			if (
 				(action === "moveX" || action === "moveY") &&
@@ -190,7 +207,7 @@ export default class GamepadController {
 				continue;
 			}
 
-			func?.callback(delta, directionCalc);
+			binding.callback(delta, directionCalc);
 		}
 	}
 }

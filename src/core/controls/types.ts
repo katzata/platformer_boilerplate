@@ -1,17 +1,16 @@
 export namespace controlsTypes {
 	export interface Binding {
 		autoFireException?: boolean;
-		callback?: (delta?: number) => void;
+		active?: boolean;
+		callback?: action;
 	}
 
 	export interface Settings {
-		autoFire: boolean;
-		autoFireExceptions: string[];
+		autoFire?: boolean;
+		autoFireExceptions?: string[];
 	}
 
-	export interface ControlSchemes {
-		[key: string]: Record<string, controlsTypes.Binding>;
-	}
+	export type action = (delta?: number, offset?: number) => void;
 }
 
 export namespace keyboardTypes {
@@ -27,20 +26,14 @@ export namespace gamepadTypes {
 	export interface GamepadScheme {
 		buttons?: Record<string, controlsTypes.Binding>;
 		axes?: {
-			bindings: AxesMap;
-			options: GamepadAxesOptions;
+			bindings: Record<string, controlsTypes.Binding>;
+			options: AxisOptions;
 		};
 	}
 
-	export interface GamepadAxesOptions {
+	export interface AxisOptions extends controlsTypes.Settings {
 		invertLeftY?: boolean;
 		invertRightY?: boolean;
-	}
-
-	interface AxesMap {
-		[key: string]: {
-			callback: (delta: number, offset: number) => void;
-		};
 	}
 
 	export interface Settings extends controlsTypes.Settings {

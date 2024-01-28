@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { keyboardDefaults, keyboardDefaultMap } from "./defaults";
+import { keyboardDefaultMap, keyboardDefaults } from "./defaults";
 import { controlsTypes, keyboardTypes } from "../types";
 import { utils } from "../../core";
 
@@ -13,7 +13,7 @@ export default class KeyboardController {
 	controlSchemes: Record<string, keyboardTypes.KeyMap> = {};
 	defaults: Record<string, Record<string, string>> = keyboardDefaultMap;
 	activeKeys: keyboardTypes.KeyMap[] = [];
-	players: Record<string, Record<string, string>> = {
+	players: Record<string, string> = {
 		"1": null,
 		"2": null,
 	};
@@ -36,28 +36,28 @@ export default class KeyboardController {
 	 * @param playerName The name of the player that will use the controls scheme.
 	 * @param controlScheme The controls scheme.
 	 */
-	public addScheme(playerName: string, controlScheme: Record<string, controlsTypes.Binding>) {
-		let newScheme = {};
+	public addScheme(playerName: string, controlScheme?: Record<string, controlsTypes.Binding>) {
+		const newScheme = { ...(controlScheme ?? keyboardDefaults) };
+		const schemeX = {};
 		const playerId = utils.removeSpaces(playerName);
 
 		for (const [index, data] of Object.entries(this.players)) {
-			if (!data) {
-				const mapping = { ...this.defaults[`mapping${index}`] };
+			if (data && data !== playerId) continue;
 
-				for (const key in mapping) {
-					newScheme[key] = {
-						...controlScheme[mapping[key]],
-						active: false,
-						playerId,
-					};
-				}
+			const mappings = { ...this.defaults[`mapping${index}`] };
 
-				this.players[index] = newScheme;
-				break;
+			for (const key in mappings) {
+				schemeX[key] = {
+					callback: newScheme[mappings[key]],
+					active: false,
+					playerId,
+				};
 			}
-		}
 
-		Object.assign(this.keyBindings, newScheme);
+			this.players[index] = playerId;
+			Object.assign(this.keyBindings, schemeX);
+			break;
+		}
 	}
 
 	/**
@@ -65,11 +65,18 @@ export default class KeyboardController {
 	 */
 	public removeScheme(playerName: string) {
 		const playerId = utils.removeSpaces(playerName);
-		const toRemove = Object.entries(this.controlSchemes).filter((binding) => binding[1].playerId === playerId);
+
+		if (!this.players[playerId]) return;
+
+		const toRemove = Object.entries(this.controlSchemes).filter(
+			(binding) => binding[1].playerId === playerId,
+		);
 
 		for (const [key] of toRemove) {
 			if (this.controlSchemes[key]) delete this.controlSchemes[key];
 		}
+
+		if (this.players[playerId]) this.players[playerId] = null;
 	}
 
 	/**
@@ -77,12 +84,8 @@ export default class KeyboardController {
 	 * @param delta The difference between each frame.
 	 */
 	private monitorKeys = (delta: number) => {
-		const keys = [...this.activeKeys];
-
-		for (const key of keys) {
-			if (key.active && key.callback) {
-				key.callback(delta);
-			}
+		for (const key of [...this.activeKeys]) {
+			if (key.active && key.callback) key.callback(delta);
 		}
 	};
 
@@ -101,14 +104,12 @@ export default class KeyboardController {
 			}
 
 			if (keyBinding.active === keyState) return;
-
 			keyBinding.active = keyState;
 
 			if (keyState) {
 				this.activeKeys.push(keyBinding);
 			} else {
-				const index = this.activeKeys.indexOf(keyBinding);
-				this.activeKeys.splice(index, 1);
+				this.activeKeys.splice(this.activeKeys.indexOf(keyBinding), 1);
 			}
 		}
 	};
