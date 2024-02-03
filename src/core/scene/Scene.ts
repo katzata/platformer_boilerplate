@@ -17,14 +17,13 @@ export default class Scene extends PIXI.Container {
 		super();
 
 		this.name = name || "Scene";
-
-		if (options?.assetPaths) this.assets = options.assetPaths;
+		this.assets = options?.assetPaths ?? [];
 
 		this.init();
 	}
 
 	private async init() {
-		const total = this.assets.length;
+		const total = this.assets?.length;
 		let count = 0;
 		let percentage = 0;
 
@@ -35,10 +34,14 @@ export default class Scene extends PIXI.Container {
 
 			if (PIXI.Assets.resolver.hasKey(fileName)) continue;
 
-			await PIXI.Assets.load({
-				alias: fileName,
-				src: path,
-			});
+			if (path.slice(path.length - 4) !== "json") {
+				await PIXI.Assets.load(path);
+			} else {
+				await PIXI.Assets.load({
+					alias: fileName + `${path.split(".")[0]}`,
+					src: path.slice(2),
+				});
+			}
 
 			if (folders.length < 4) continue;
 
