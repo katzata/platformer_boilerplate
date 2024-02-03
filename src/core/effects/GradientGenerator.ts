@@ -1,15 +1,17 @@
 import * as PIXI from "pixi.js";
 
-export interface GradientOptions {
-	colorStops?: ([number, string] | string)[];
-	type?: string | "linear" | "radial";
-	width?: number;
-	height?: number;
-	quality?: number;
-	radiuses?: number[] | [number, number];
-	instances?: number;
-	cropped?: boolean;
-	radiusOffsets?: { x: number; y: number } | { x: number; y: number }[];
+export namespace gradientTypes {
+	export interface GradientOptions {
+		colorStops?: ([number, string] | string)[];
+		type?: string | "linear" | "radial";
+		width?: number;
+		height?: number;
+		quality?: number;
+		radiuses?: number[] | [number, number];
+		instances?: number;
+		cropped?: boolean;
+		radiusOffsets?: { x: number; y: number } | { x: number; y: number }[];
+	}
 }
 
 export default class GradientGenerator {
@@ -25,10 +27,10 @@ export default class GradientGenerator {
 		radiusOffsets: { x: 0, y: 0 },
 	};
 
-	settings: GradientOptions = {};
+	settings: gradientTypes.GradientOptions = {};
 	instances: PIXI.Sprite[];
 
-	public generateGradient(props?: GradientOptions) {
+	public generateGradient(props?: gradientTypes.GradientOptions) {
 		Object.assign(this.settings, GradientGenerator.defaults, props);
 		const gradientTexture = this.generateTexture();
 
@@ -109,7 +111,10 @@ export default class GradientGenerator {
 
 	private addColorStops(gradient: CanvasGradient, colorStops: ([number, string] | string)[]) {
 		for (let i = 0; i < colorStops.length; i++) {
-			const stops = colorStops[i] instanceof Array ? colorStops[i] : [i / colorStops.length, colorStops[i]];
+			const stops =
+				colorStops[i] instanceof Array
+					? colorStops[i]
+					: [i / colorStops.length, colorStops[i]];
 			// @ts-ignore tuple...
 			gradient.addColorStop(...stops);
 		}
