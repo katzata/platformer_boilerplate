@@ -26,8 +26,6 @@ export default class KeyboardController {
 		window.addEventListener("keydown", this.onEvent);
 		window.addEventListener("keyup", this.onEvent);
 
-		// this.initBindings();
-
 		PIXI.Ticker.shared.add(this.monitorKeys);
 	}
 
@@ -37,8 +35,8 @@ export default class KeyboardController {
 	 * @param controlScheme The controls scheme.
 	 */
 	public addScheme(playerName: string, controlScheme?: Record<string, controlsTypes.Binding>) {
-		const newScheme = { ...(controlScheme ?? keyboardDefaults) };
-		const schemeX = {};
+		const playerScheme = { ...(controlScheme ?? keyboardDefaults) };
+		const newScheme = {};
 		const playerId = utils.removeSpaces(playerName);
 
 		for (const [index, data] of Object.entries(this.players)) {
@@ -47,15 +45,16 @@ export default class KeyboardController {
 			const mappings = { ...this.defaults[`mapping${index}`] };
 
 			for (const key in mappings) {
-				schemeX[key] = {
-					callback: newScheme[mappings[key]],
+				newScheme[key] = {
+					callback: playerScheme[mappings[key]],
 					active: false,
 					playerId,
+					key: mappings[key],
 				};
 			}
 
 			this.players[index] = playerId;
-			Object.assign(this.keyBindings, schemeX);
+			Object.assign(this.keyBindings, newScheme);
 			break;
 		}
 	}
@@ -84,8 +83,8 @@ export default class KeyboardController {
 	 * @param delta The difference between each frame.
 	 */
 	private monitorKeys = (delta: number) => {
-		for (const key of [...this.activeKeys]) {
-			if (key.active && key.callback) key.callback(delta);
+		for (const key of this.activeKeys) {
+			if (key.active && key.callback) key.callback(key.key, delta);
 		}
 	};
 
@@ -99,7 +98,7 @@ export default class KeyboardController {
 
 		if (keyBinding) {
 			if (!keyBinding?.callback) {
-				console.warn(`Key binding ${keyEvent.code} is not assigned.`);
+				console.warn(`Key binding ${keyEvent.code} has no callback.`);
 				return;
 			}
 
@@ -113,4 +112,14 @@ export default class KeyboardController {
 			}
 		}
 	};
+
+	/**
+	 * Check if a key that should block the current one is being pressed.
+	 * @param controller The key for the controller.
+	 * @param masterKeys All the keys that will block the current one.
+	 * @returns true or false
+	 */
+	public keyBlockCheck(controller: "keyboard", masterKeys: string[]) {
+		return this.activeKeys.filter((el) => masterKeys.indexOf(el.key) >= 0).length > 0;
+	}
 }

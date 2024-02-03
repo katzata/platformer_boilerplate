@@ -1,17 +1,17 @@
 import config from "./controlsConfig.json";
 import GamepadController from "./Gamepad/GamepadController";
 import KeyboardController from "./Keyboard/KeyboardController";
-import { controlsTypes, gamepadTypes } from "./types";
+import { controlsTypes, gamepadTypes, keyboardTypes } from "./types";
 import type Char from "../scene/chars/Char";
 
 class Controls {
 	config = config;
 	keyboard: KeyboardController;
-	gamepadController: GamepadController;
+	gamepad: GamepadController;
 
 	constructor() {
 		this.keyboard = new KeyboardController();
-		this.gamepadController = new GamepadController();
+		this.gamepad = new GamepadController();
 	}
 
 	/**
@@ -32,14 +32,14 @@ class Controls {
 	 * Add a keyboard controls scheme.
 	 */
 	public addGamepadScheme(player: Char, controlScheme?: gamepadTypes.GamepadScheme) {
-		this.gamepadController.addScheme(player.charName, controlScheme);
+		this.gamepad.addScheme(player.charName, controlScheme);
 	}
 
 	/**
 	 * Remove an already existing controls scheme.
 	 */
 	public removeGamepadScheme(playerName: string) {
-		this.gamepadController.removeScheme(playerName);
+		this.gamepad.removeScheme(playerName);
 	}
 }
 

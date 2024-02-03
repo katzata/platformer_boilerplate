@@ -10,13 +10,14 @@ export namespace controlsTypes {
 		autoFireExceptions?: string[];
 	}
 
-	export type action = (delta?: number, offset?: number) => void;
+	export type action = (key?: string, delta?: number, offset?: number) => void;
 }
 
 export namespace keyboardTypes {
 	export interface KeyMap extends controlsTypes.Binding {
 		active?: boolean;
 		playerId?: string;
+		key?: string;
 	}
 
 	export interface Settings extends controlsTypes.Settings {}

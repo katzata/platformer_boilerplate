@@ -159,14 +159,14 @@ export default class GamepadController {
 				continue;
 
 			if (buttons[i].pressed && bindingCheck(binding) && binding?.callback) {
-				binding.callback(delta);
+				binding.callback(null, delta);
 				binding.active = true;
 			}
 
 			if (i >= end) break;
 
 			if (buttons[end].pressed && bindingCheck(binding2) && binding2?.callback) {
-				binding2.callback(delta);
+				binding2.callback(null, delta);
 				binding2.active = true;
 			}
 		}
@@ -207,7 +207,7 @@ export default class GamepadController {
 				continue;
 			}
 
-			binding.callback(delta, directionCalc);
+			binding.callback(action, delta, directionCalc);
 		}
 	}
 }
